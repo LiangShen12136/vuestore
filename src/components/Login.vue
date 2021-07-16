@@ -44,6 +44,7 @@ export default {
     }
   },
   methods:{
+    // 重置是回到初始值
     loginFormReset(){
       this.$refs.loginFormRef.resetFields();
     },
@@ -59,7 +60,7 @@ export default {
         // console.log(res);
         // 1.将token存在sessionStorage里
         window.sessionStorage.setItem("token",res.data.token);
-        // 2.登录成功之后跳转到home主页
+        // 2.deng
         this.$router.push("/home");
       })
     }
@@ -68,7 +69,7 @@ export default {
 </script>
 
 // 加入scoped之后，改样式只对该组件生效
-<style  scoped>
+<style  lang="less" scoped>
 .Login_container{
     background: #2b4b6b;
     height: 100%;
