@@ -19,8 +19,9 @@
         </el-col>
       </el-row>
 
+<!-- stripe隔行变色 -->
       <el-table 
-      :data="userList" 
+      :data="userList"
       stripe
       border>
         <el-table-column
@@ -59,9 +60,9 @@
           <template v-slot="scope">
             <el-button type="primary" icon="el-icon-edit" size='mini' @click="editUserShow(scope.row.id)"></el-button>
             <el-button type="danger" icon="el-icon-delete" size='mini' @click="deleteUserById(scope.row.id)"></el-button>
-            <el-tooltip class="item" effect="dark" content="分配角色" placement="top" :enterable="false">
-              <el-button type="warning" icon="el-icon-setting" size='mini'></el-button>
-            </el-tooltip>
+            <!-- <el-tooltip class="item" effect="dark" content="分配角色" placement="top" :enterable="false"> -->
+              <el-button type="warning" icon="el-icon-setting" size='mini' @click="setRole(scope.row)"></el-button>
+            <!-- </el-tooltip> -->
           </template>
           
         </el-table-column>
@@ -130,6 +131,32 @@
     <el-button type="primary" @click="editUserCommit">确 定</el-button>
   </span>
 </el-dialog>
+
+    <!-- 分配角色对话框 -->
+    <el-dialog
+      title="分配角色"
+      :visible.sync="setRoleDialogVisible"
+      width="30%"
+      >
+      <div>
+        <p>当前用户：{{userInfo.username}}</p>
+        <p>当前用户：{{userInfo.role_name}}</p>
+        <p>分配角色：
+          <el-select v-model="selectedRoleId" placeholder="请选择">
+            <el-option
+              v-for="item in rolesList"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </p>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="setRoleDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="saveRole">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 
 
@@ -209,7 +236,12 @@ export default {
           // 添加自定义的邮箱验证规则
           { validator: checkMobile, trigger: 'blur' }
         ]
-      }
+      },
+      setRoleDialogVisible:false,
+      userInfo:{},
+      rolesList:{},
+      // 被选中的新的角色id
+      selectedRoleId:'',
     }
   },
 
@@ -311,6 +343,26 @@ export default {
         }
         this.$message.success('删除用户成功');
         this.getUsersList();
+    },
+    async setRole(userInfo){
+      this.userInfo=userInfo;
+      // console.log(this.userInfo);
+      const {data:res}=await this.$http.get('roles');
+      if(res.meta.status!=200) {
+        return this.$message.error('获取角色列表失败');
+      }
+      this.rolesList=res.data;
+      // console.log(this.rolesList);
+      this.setRoleDialogVisible=true;
+    },
+    async saveRole(){
+      const {data:res}=await this.$http.put(`users/${this.userInfo.id}/role`,{rid:this.selectedRoleId});
+      if(res.meta.status!=200) {
+        return this.$message.error('分配新角色失败');
+      }
+      this.$message.success('分配新角色成功');
+      this.getUsersList();
+      this.setRoleDialogVisible = false;
     }
   }
 }
